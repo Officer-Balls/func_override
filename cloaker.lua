@@ -164,3 +164,21 @@ hook.Add("PrePlayerDraw","SasCloaker",function(ply)
     body_mat:SetFloat("$cloakfactor",factor)
     lens_mat:SetFloat("$cloakfactor",factor)
 end)
+
+
+
+local vignette_mat = Material("vgui/zoom")
+hook.Add("HUDPaint","Cloaker",function()
+    if not LocalPlayer():GetNW2Bool("Cloaker",false) then return end
+    local intensity = LocalPlayer():GetNW2Float("CloakFactor")^2
+    
+    surface.SetDrawColor(0,0,0,intensity*255)
+    surface.SetMaterial(vignette_mat)
+
+    local W,H = ScrW(),ScrH()
+
+    surface.DrawTexturedRectUV(0,0,W*0.5,H*0.5,1,0,0,1)
+    surface.DrawTexturedRectUV(W*0.5,0,W*0.5,H*0.5,0,0,1,1)
+    surface.DrawTexturedRectUV(W*0.5,H*0.5,W*0.5,H*0.5,0,1,1,0)
+    surface.DrawTexturedRectUV(0,H*0.5,W*0.5,H*0.5,1,1,0,0)
+end)
