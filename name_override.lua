@@ -6,7 +6,9 @@ local NICK = FindMetaTable("Player").Nick
 
 local override = {}
 override.Nick = function(self)
-    return self:GetNW2String("NameOverride",nil) or NICK(self)
+    local name = self:GetNW2String("NameOverride","")
+    if name == "" then name = nil end
+    return name or NICK(self)
 end
 override.Name = override.Nick
 override.GetName = override.Nick
