@@ -12,9 +12,7 @@ override.Name = override.Nick
 override.GetName = override.Nick
 
 local function Init()
-    local
-    ply.__override = {}
-
+    ply.__override = override
 end
 
 if not IsValid(ply) then
