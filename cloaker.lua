@@ -40,7 +40,7 @@ local GLYPHS = "abcdefghijklmnopqrstuvwxyz0123456789#@$%&*+=<>?/\\|~ "
 -- tweakables ----------------------------------------------------
 local SPREAD         = 0.6   -- chars start decaying at different times, spread over this much of the fade
 local SIMILAR_END    = 0.40  -- up to this point of a char's own decay it shows look-alikes...
-local RANDOM_END     = 0.75  -- ...then random glyphs up to here, then it's gone
+local RANDOM_END     = 0.5  -- ...then random glyphs up to here, then it's gone
 local FRACTION_STEPS = 6  -- scramble granularity (higher = decimals re-roll the glyphs more often)
 ------------------------------------------------------------------
 
@@ -170,15 +170,20 @@ end)
 local vignette_mat = Material("vgui/zoom")
 hook.Add("HUDPaint","Cloaker",function()
     if not LocalPlayer():GetNW2Bool("Cloaker",false) then return end
-    local intensity = LocalPlayer():GetNW2Float("CloakFactor")^2
-    
-    surface.SetDrawColor(0,0,0,intensity*255)
+    local intensity = LocalPlayer():GetNW2Float("CloakFactor")^10
+
     surface.SetMaterial(vignette_mat)
 
     local W,H = ScrW(),ScrH()
 
-    surface.DrawTexturedRectUV(0,0,W*0.5,H*0.5,1,0,0,1)
-    surface.DrawTexturedRectUV(W*0.5,0,W*0.5,H*0.5,0,0,1,1)
-    surface.DrawTexturedRectUV(W*0.5,H*0.5,W*0.5,H*0.5,0,1,1,0)
-    surface.DrawTexturedRectUV(0,H*0.5,W*0.5,H*0.5,1,1,0,0)
+    for i = 0,2 do
+        if intensity<i/3 then continue end
+        local l_int = math.Remap(intensity,i/3,(i+1)/3,0,1)
+        surface.SetDrawColor(0,0,0,l_int*255)
+
+        surface.DrawTexturedRectUV(0,0,W*0.5,H*0.5,1,0,0,1)
+        surface.DrawTexturedRectUV(W*0.5,0,W*0.5,H*0.5,0,0,1,1)
+        surface.DrawTexturedRectUV(W*0.5,H*0.5,W*0.5,H*0.5,0,1,1,0)
+        surface.DrawTexturedRectUV(0,H*0.5,W*0.5,H*0.5,1,1,0,0)
+    end
 end)
