@@ -301,7 +301,7 @@ local effect = {
 }
 
 local vignette_mat = Material("vgui/zoom")
-hook.Add("HUDPaint","Cloaker",function()
+hook.Add("RenderScreenspaceEffects","Cloaker",function()
     if not LocalPlayer():GetNW2Bool("Cloaker",false) then return end
     if LocalPlayer():ShouldDrawLocalPlayer() then return end
     local intensity = LocalPlayer():GetNW2Float("CloakFactor")^7
