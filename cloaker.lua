@@ -8,6 +8,18 @@ surface.SetMaterial(hack_mat)
 surface.SetDrawColor(color_white)
 surface.DrawTexturedRect(0,0,1024,1024)
 
+-- DrawColorModify({
+-- 	[ "$pp_colour_addr" ] = 0,
+-- 	[ "$pp_colour_addg" ] = 0,
+-- 	[ "$pp_colour_addb" ] = 0,
+-- 	[ "$pp_colour_brightness" ] = 0.5,
+-- 	[ "$pp_colour_contrast" ] = 1.5,
+-- 	[ "$pp_colour_colour" ] = 0,
+-- 	[ "$pp_colour_mulr" ] = -1,
+-- 	[ "$pp_colour_mulg" ] = -1,
+-- 	[ "$pp_colour_mulb" ] = 0,
+--     [ "$pp_colour_inv" ] = 1
+-- })
 DrawColorModify({
 	[ "$pp_colour_addr" ] = 0,
 	[ "$pp_colour_addg" ] = 0,
@@ -28,7 +40,6 @@ render.PopRenderTarget()
 local body_mat = CreateMaterial("SASCloakerBody","VertexLitGeneric",{
     ["$basetexture"] = "models/cstrike/ct_sas",
     ["$bumpmap"] = "models/cstrike/ct_sas_normal",
-    ["$color2"] = "[0.2 0.2 0.2]",
     ["$phong"] = 1,
     ["$phongexponent"] = "5",
     ["$phongboost"] = "0.2",
@@ -52,7 +63,7 @@ local lens_mat = CreateMaterial("SASCloakerLens","VertexLitGeneric",{
     ["$envmaptint"] = "[1 0 0]",
     ["$translucent"] = 1,
     ["$cloakpassenabled"] = 1,
-    ["$cloakcolortint"] = "[1 0.3 0.3]"
+    ["$cloakcolortint"] = "[1 0 0]"
 })
 
 local SIMILAR = {
@@ -212,6 +223,42 @@ local function GetCloakMaterial(mat_path)
     return cloak_mat
 end
 
+local melee_weapon_types = {
+    ["ma2z_blade_switchblade"] = true,
+    ["ma2z_blade_cssknife"] = true,
+    ["ma2z_blade_tanto"] = true,
+    ["ma2z_blade_dadao"] = true,
+    ["ma2z_blade_machete"] = true,
+    ["ma2z_blade_katana"] = true,
+    ["ma2z_spear_stick"] = true,
+    ["ma2z_spear_fork"] = true,
+    ["ma2z_spear_shovel"] = true,
+    ["ma2z_spear_harpoon"] = true,
+    ["ma2z_spear_spear"] = true,
+    ["ma2z_spear_trident"] = true,
+    ["ma2z_staff_branch"] = true,
+    ["ma2z_staff_bo"] = true,
+    ["ma2z_staff_nunchucks"] = true,
+    ["ma2z_staff_quarterstaff"] = true,
+    ["ma2z_staff_metal"] = true,
+    ["ma2z_staff_scythe"] = true,
+    ["ma2z_axe_survivalaxe"] = true,
+    ["ma2z_axe_hatchet"] = true,
+    ["ma2z_axe_pickaxe"] = true,
+    ["ma2z_axe_beardedaxe"] = true,
+    ["ma2z_axe_tomahawk"] = true,
+    ["ma2z_axe_fireaxe"] = true,
+    ["ma2z_bludgeon_hammer"] = true,
+    ["ma2z_bludgeon_nightstick"] = true,
+    ["ma2z_bludgeon_club"] = true,
+    ["ma2z_bludgeon_bat"] = true,
+    ["ma2z_bludgeon_crowbar"] = true,
+    ["ma2z_bludgeon_sledgehammer"] = true,
+    ["ma2z_syringe"] = true,
+    ["ma2z_streiter"] = true,
+    ["weapon_crowbar"] = true,
+}
+
 hook.Add("PrePlayerDraw","SasCloaker",function(ply)
     if not ply:GetNW2Bool("Cloaker",false) then return end
     if ply:GetModel()~="models/player/gasmask.mdl" then return end
@@ -228,22 +275,36 @@ hook.Add("PrePlayerDraw","SasCloaker",function(ply)
     lens_mat:SetFloat("$cloakfactor",factor)
 
     local weapon = ply:GetActiveWeapon()
-    if weapon:IsWeaponVisible() then
-        for i,mat_path in ipairs(weapon:GetMaterials()) do
-            local swep_cloak_mat = GetCloakMaterial(mat_path)
-            if not swep_cloak_mat then continue end
-            swep_cloak_mat:SetFloat("$cloakfactor",factor)
-            weapon:SetSubMaterial(i-1,"!"..swep_cloak_mat:GetName())
-        end
+    if not weapon then return end
+    if not weapon:IsWeaponVisible() then return end
+    if not melee_weapon_types[weapon:GetClass()] then return end
+    for i,mat_path in ipairs(weapon:GetMaterials()) do
+        local swep_cloak_mat = GetCloakMaterial(mat_path)
+        if not swep_cloak_mat then continue end
+        swep_cloak_mat:SetFloat("$cloakfactor",factor)
+        weapon:SetSubMaterial(i-1,"!"..swep_cloak_mat:GetName())
     end
 end)
 
 
+local effect = {
+	[ "$pp_colour_addr" ] = 0,
+	[ "$pp_colour_addg" ] = 0,
+	[ "$pp_colour_addb" ] = 0,
+	[ "$pp_colour_brightness" ] = 0.47,
+	[ "$pp_colour_contrast" ] = 2.72,
+	[ "$pp_colour_colour" ] = -1,
+	[ "$pp_colour_mulr" ] = 0,
+	[ "$pp_colour_mulg" ] = 0,
+	[ "$pp_colour_mulb" ] = 0,
+    [ "$pp_colour_inv" ] = 0
+}
 
 local vignette_mat = Material("vgui/zoom")
 hook.Add("HUDPaint","Cloaker",function()
     if not LocalPlayer():GetNW2Bool("Cloaker",false) then return end
-    local intensity = LocalPlayer():GetNW2Float("CloakFactor")^10
+    if LocalPlayer():ShouldDrawLocalPlayer() then return end
+    local intensity = LocalPlayer():GetNW2Float("CloakFactor")^7
 
     surface.SetMaterial(vignette_mat)
 
@@ -259,4 +320,11 @@ hook.Add("HUDPaint","Cloaker",function()
         surface.DrawTexturedRectUV(W*0.5,H*0.5,W*0.5,H*0.5,0,1,1,0)
         surface.DrawTexturedRectUV(0,H*0.5,W*0.5,H*0.5,1,1,0,0)
     end
+
+    -- effect["$pp_colour_addr"] = 0.45*intensity
+	effect[ "$pp_colour_brightness" ] = -0.06*intensity
+	effect[ "$pp_colour_contrast" ] = 1-0.69*intensity
+	effect[ "$pp_colour_colour" ] = 1-1*intensity
+    effect["$pp_colour_mulr"] = 6*intensity
+    DrawColorModify(effect)
 end)
