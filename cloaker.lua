@@ -1,27 +1,58 @@
+local hack_mat = CreateMaterial("_hack_material","UnlitGeneric",{["$basetexture"] = "models/cstrike/ct_sas"})
+local sas_basetexture = GetRenderTargetEx("sas_cloaker_basetexture",1024,1024,RT_SIZE_NO_CHANGE,MATERIAL_RT_DEPTH_NONE,0,0,0)
+
+render.PushRenderTarget(sas_basetexture)
+cam.Start2D()
+render.Clear(0,0,0,0)
+surface.SetMaterial(hack_mat)
+surface.SetDrawColor(color_white)
+surface.DrawTexturedRect(0,0,1024,1024)
+
+DrawColorModify({
+	[ "$pp_colour_addr" ] = 0,
+	[ "$pp_colour_addg" ] = 0,
+	[ "$pp_colour_addb" ] = 0,
+	[ "$pp_colour_brightness" ] = -0.1,
+	[ "$pp_colour_contrast" ] = 2,
+	[ "$pp_colour_colour" ] = 0,
+	[ "$pp_colour_mulr" ] = 1,
+	[ "$pp_colour_mulg" ] = 1,
+	[ "$pp_colour_mulb" ] = 0,
+    [ "$pp_colour_inv" ] = 0
+})
+cam.End2D()
+render.PopRenderTarget()
+
+
+
 local body_mat = CreateMaterial("SASCloakerBody","VertexLitGeneric",{
     ["$basetexture"] = "models/cstrike/ct_sas",
     ["$bumpmap"] = "models/cstrike/ct_sas_normal",
+    ["$color2"] = "[0.2 0.2 0.2]",
     ["$phong"] = 1,
-    ["$phongexponent"] = "10",
-    ["$phongboost"] = "1",
+    ["$phongexponent"] = "5",
+    ["$phongboost"] = "0.2",
     ["$phongfresnelranges"] = "[0.05 0.1 0.5]",
     ["$rimlight"] = "1",
-    ["$rimlightexponent"] = "8",
+    ["$rimlightexponent"] = "4",
     ["$rimlightboost"] = "2",
     ["$phongexponenttexture"] = "models/cstrike/ct_sas_normal",
     ["$rimmask"] = "1",
     ["$cloakpassenabled"] = 1,
 })
 
+body_mat:SetTexture("$basetexture",sas_basetexture)
+body_mat:Recompute()
+
 local lens_mat = CreateMaterial("SASCloakerLens","VertexLitGeneric",{
     ["$baseTexture"] = "models/cstrike/ct_sas_glass",
     ["$envmap"] = "env_cubemap",
     ["$envmapmask"] = "models/cstrike/ct_sas_glass_spec",
-    ["$color2"] = "[1 0.2 0]",
-    ["$envmaptint"] = "[1 0.2 0]",
+    ["$color2"] = "[1 0 0]",
+    ["$envmaptint"] = "[1 0 0]",
     ["$translucent"] = 1,
     ["$cloakpassenabled"] = 1,
-    ["$cloakcolortint"] = "[1 0.6 0.6]"
+    ["$cloakcolortint"] = "[1 0.3 0.3]"
 })
 
 local SIMILAR = {
