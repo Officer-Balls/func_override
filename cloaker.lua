@@ -148,6 +148,38 @@ local override = {
     GetName = nick
 }
 
+local cloak_mats = {}
+local function GetCloakMaterial(mat_path)
+    if cloak_mats[mat_path] then return cloak_mats[mat_path] end
+    local mat = Material(mat_path)
+
+    if mat:IsError() then return end
+
+    local newname = "c_"..mat:GetName()
+
+    local key_values = mat:GetKeyValues()
+    local flags = key_values["$flags"]
+    local flags2 = key_values["$flags2"]
+    local flags_defined = key_values["$flags_defined"]
+    local flags_defined2 = key_values["$flags_defined2"]
+
+    key_values["$flags"] = nil
+    key_values["$flags2"] = nil
+    key_values["$flags_defined"] = nil
+    key_values["$flags_defined2"] = nil
+    key_values["$cloakpassenabled"] = 1
+
+    local cloak_mat = CreateMaterial(newname,mat:GetShader(),key_values)
+    cloak_mat:SetTexture("$basetexture",mat:GetTexture("$basetexture"))
+    cloak_mat:SetTexture("$bumpmap",mat:GetTexture("$bumpmap"))
+    cloak_mat:SetInt("$flags",flags)
+    cloak_mat:SetInt("$flags2",flags2)
+    cloak_mat:SetInt("$flags_defined",flags_defined)
+    cloak_mat:SetInt("$flags_defined2",flags_defined2)
+
+    cloak_mats[mat_path] = cloak_mat
+    return cloak_mat
+end
 
 hook.Add("PrePlayerDraw","SasCloaker",function(ply)
     if not ply:GetNW2Bool("Cloaker",false) then return end
@@ -163,6 +195,16 @@ hook.Add("PrePlayerDraw","SasCloaker",function(ply)
 
     body_mat:SetFloat("$cloakfactor",factor)
     lens_mat:SetFloat("$cloakfactor",factor)
+
+    local weapon = ply:GetActiveWeapon()
+    if weapon:IsWeaponVisible() then
+        for i,mat_path in ipairs(weapon:GetMaterials()) do
+            local swep_cloak_mat = GetCloakMaterial(mat_path)
+            if not swep_cloak_mat then continue end
+            swep_cloak_mat:SetFloat("$cloakfactor",factor)
+            weapon:SetSubMaterial(i-1,"!"..swep_cloak_mat:GetName())
+        end
+    end
 end)
 
 
