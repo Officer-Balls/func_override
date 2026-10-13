@@ -276,7 +276,7 @@ hook.Add("PrePlayerDraw","SasCloaker",function(ply)
 
     local weapon = ply:GetActiveWeapon()
     if not weapon then return end
-    if not weapon:IsWeaponVisible() then return end
+    if weapon:GetNoDraw() then return end
     if not melee_weapon_types[weapon:GetClass()] then return end
     for i,mat_path in ipairs(weapon:GetMaterials()) do
         local swep_cloak_mat = GetCloakMaterial(mat_path)
@@ -322,9 +322,9 @@ hook.Add("RenderScreenspaceEffects","Cloaker",function()
     end
 
     -- effect["$pp_colour_addr"] = 0.45*intensity
-	effect[ "$pp_colour_brightness" ] = -0.06*intensity
-	effect[ "$pp_colour_contrast" ] = 1-0.69*intensity
+	effect[ "$pp_colour_brightness" ] = -0.02*intensity
+	effect[ "$pp_colour_contrast" ] = 1-0.16*intensity
 	effect[ "$pp_colour_colour" ] = 1-1*intensity
-    effect["$pp_colour_mulr"] = 6*intensity
+    effect["$pp_colour_mulr"] = 4*intensity
     DrawColorModify(effect)
 end)
