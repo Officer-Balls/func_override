@@ -275,7 +275,7 @@ hook.Add("PrePlayerDraw","SasCloaker",function(ply)
     lens_mat:SetFloat("$cloakfactor",factor)
 
     local weapon = ply:GetActiveWeapon()
-    if not weapon then return end
+    if not IsValid(weapon) then return end
     if weapon:GetNoDraw() then return end
     if not melee_weapon_types[weapon:GetClass()] then return end
     for i,mat_path in ipairs(weapon:GetMaterials()) do
